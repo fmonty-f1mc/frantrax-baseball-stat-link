@@ -6,6 +6,10 @@ import duckdb
 from scripts.rosters import *
 from io import StringIO
 import time
+import re
+# coding=utf-8
+from unidecode import unidecode
+import codecs 
 
 #class that just pulls each day you want at one time
 class periodBBR:
@@ -128,6 +132,9 @@ class fantraxBBR:
             roster[i]=fantraxRosters(self.leagueid,i)
         self.roster=roster
 
+        #quick lambda function to translate unicode for mostly for those that dont have a connection between mlb and fantrax
+        self.uniTranslate=lambda x: unidecode(codecs.escape_decode(x)[0].decode())
+
 
             
     def linkPitching(self):
@@ -136,9 +143,11 @@ class fantraxBBR:
         playerStats1={}
         #gonna name player map something simple
         pmap=self.playerMap
-        for i in self.periods:
+        for i in self.periods:            
             dfs=periodBBR(i).pitchStats()
             stats=pd.concat([dfs[x] for x in dfs])
+            stats["first_name"]=stats.apply(lambda row: self.uniTranslate(row.Name.split(" ")[0]), axis=1)
+            stats["last_name"]=stats.apply(lambda row: self.uniTranslate(row.Name.split(" ")[1]), axis=1)
             for n in self.roster[i].playerRosters:
                 fantrax=self.roster[i].playerRosters[n].query("status == 'ACTIVE' ").query("position == 'P' ")
                 fantrax["team_name"] = n
@@ -156,6 +165,8 @@ class fantraxBBR:
         for i in self.periods:
             dfs=periodBBR(i).batStats()
             stats=pd.concat([dfs[x] for x in dfs])
+            stats["first_name"]=stats.apply(lambda row: self.uniTranslate(row.Name.split(" ")[0]), axis=1)
+            stats["last_name"]=stats.apply(lambda row: self.uniTranslate(row.Name.split(" ")[1]), axis=1)
             for n in self.roster[i].playerRosters:
                 fantrax=self.roster[i].playerRosters[n].query("status == 'ACTIVE' ").query("position != 'P' ")
                 fantrax["team_name"] = n

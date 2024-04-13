@@ -8,11 +8,8 @@ SUBSTRING(FANTRAXID,2,LEN(FANTRAXID)-2) as fanid
 ,MLBID AS mlbid
 from pmap)
 
-,stage1 AS (
-    SELECT *, split(name,' ') as new_name FROM stats 
-)
 ,stage2 AS (
-    SELECT * ,new_name[2] || ', ' || new_name[1] as mapName FROM stage1 
+    SELECT * ,last_name || ', ' || first_name as mapName FROM stats 
 )
 ,stage3 AS ( 
     SELECT a.*, p.fanid, if(p.fanid is null,1,0) as mapFlag FROM stage2 a
