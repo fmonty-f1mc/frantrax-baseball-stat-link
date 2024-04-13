@@ -3,6 +3,8 @@ SELECT
 ,df1.position 
 ,df1.status 
 ,pIDs.name 
+,split(pIDs.name,' ')[2] as first_name
+,split(pIDs.name,',')[1] as last_name
 ,pIDs.rotowireId
 ,pIDs.statsIncId
 ,pIDs.sportRadarId
