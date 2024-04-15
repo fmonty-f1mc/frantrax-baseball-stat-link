@@ -135,6 +135,22 @@ class fantraxBBR:
         #quick lambda function to translate unicode for mostly for those that dont have a connection between mlb and fantrax
         self.uniTranslate=lambda x: unidecode(codecs.escape_decode(x)[0].decode())
 
+    def ipConvert(self,col):
+        try:
+            int(col)
+        except:
+            return col
+        else:
+            dec=int(str(col).split(".")[1])
+            num=int(str(col).split(".")[0])
+
+            if dec == 1:
+                return num+.33
+            elif dec == 2:
+                return num+.66
+            else:
+                return num
+
 
             
     def linkPitching(self):
@@ -148,6 +164,7 @@ class fantraxBBR:
             stats=pd.concat([dfs[x] for x in dfs])
             stats["first_name"]=stats.apply(lambda row: self.uniTranslate(row.Name.split(" ")[0]), axis=1)
             stats["last_name"]=stats.apply(lambda row: self.uniTranslate(row.Name.split(" ")[1]), axis=1)
+            stats["IPCONVERTED"]=stats.apply(lambda row: self.ipConvert(row.IP), axis=1)
             for n in self.roster[i].playerRosters:
                 fantrax=self.roster[i].playerRosters[n].query("status == 'ACTIVE' ").query("position == 'P' ")
                 fantrax["team_name"] = n
