@@ -150,7 +150,18 @@ class fantraxBBR:
                 return num+.66
             else:
                 return num
-
+            
+    def qualityStarts(self,ip,er):
+        try:
+            int(ip)
+            int(er)
+        except:
+            return 0
+        else:
+            if ip >= 6 and er <=3:
+                return 1
+            else:
+                return 0
 
             
     def linkPitching(self):
@@ -159,16 +170,21 @@ class fantraxBBR:
         playerStats1={}
         #gonna name player map something simple
         pmap=self.playerMap
+
+        #gonna pull statcast data for various stats cant get from bbr
+        stcst=pybaseball.statcast(self.startDate,self.endDate)
         for i in self.periods:            
             dfs=periodBBR(i).pitchStats()
             stats=pd.concat([dfs[x] for x in dfs])
             stats["first_name"]=stats.apply(lambda row: self.uniTranslate(row.Name.split(" ")[0]), axis=1)
             stats["last_name"]=stats.apply(lambda row: self.uniTranslate(row.Name.split(" ")[1]), axis=1)
             stats["IPCONVERTED"]=stats.apply(lambda row: self.ipConvert(row.IP), axis=1)
+            stats["QS"]=stats.apply(lambda row: self.qualityStarts(row.IP,row.ER), axis=1)
             for n in self.roster[i].playerRosters:
                 fantrax=self.roster[i].playerRosters[n].query("status == 'ACTIVE' ").query("position == 'P' ")
                 fantrax["team_name"] = n
-                playerStats[str(str(i)+str(n))]=duckdb.query(open('utils/statPull.sql').read()).to_df()
+                initpull=duckdb.query(open('utils/statPull.sql').read()).to_df()
+                playerStats[str(str(i)+str(n))]=duckdb.query(open('utils/expandedPitch.sql').read()).to_df()
                 #playerStats[i]={n:duckdb.query(open('utils/statPull.sql').read()).to_df()}
         
         return playerStats
